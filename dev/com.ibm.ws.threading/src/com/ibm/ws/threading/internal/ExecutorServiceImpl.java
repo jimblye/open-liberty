@@ -591,13 +591,13 @@ public final class ExecutorServiceImpl implements WSExecutorService, ThreadQuies
      */
     @Override
     @FFDCIgnore(TimeoutException.class)
-    public boolean quiesceThreads() {
+    public boolean quiesceThreads(long quiesceTimeoutMillis) {
         this.serverStopping = true;
 
         try {
-            // Wait 30 seconds for all pre-quiesce work to complete
+            // Wait for all pre-quiesce work to complete.
             phaser.arriveAndDeregister();
-            phaser.awaitAdvanceInterruptibly(0, 30, TimeUnit.SECONDS);
+            phaser.awaitAdvanceInterruptibly(0, quiesceTimeoutMillis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             //FFDC and fail quiesce notification
             return false;
