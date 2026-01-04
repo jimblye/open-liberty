@@ -82,7 +82,9 @@ instrument.classesExcludes: com/ibm/ws/config/internal/resources/*.class
 	com.ibm.ws.kernel.boot.nested;version=latest,\
 	com.ibm.ws.kernel.boot;version=latest,\
 	com.ibm.ws.kernel.boot.common;version=latest,\
-	com.ibm.websphere.appserver.spi.logging;version=latest
+	com.ibm.ws.kernel.boot.core;version=latest,\
+	com.ibm.websphere.appserver.spi.logging;version=latest,\
+	com.ibm.ws.kernel.server.element;version=latest
 
 -testpath: \
 	../build.sharedResources/lib/junit/old/junit.jar;version=file, \
@@ -97,4 +99,5 @@ instrument.classesExcludes: com/ibm/ws/config/internal/resources/*.class
 	com.ibm.ws.logging;version=latest, \
 	com.ibm.ws.kernel.boot.logging;version=latest, \
 	com.ibm.ws.kernel.security.thread;version=latest,\
-	com.ibm.ws.kernel.boot.core;version=latest
+	com.ibm.ws.kernel.boot.core;version=latest,\
+	com.ibm.ws.kernel.server.element;version=latest
