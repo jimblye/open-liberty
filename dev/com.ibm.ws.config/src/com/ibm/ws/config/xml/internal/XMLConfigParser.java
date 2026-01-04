@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 import javax.xml.stream.Location;
@@ -48,8 +47,6 @@ import com.ibm.ws.config.xml.internal.DefaultConfiguration.DefaultConfigFile;
 import com.ibm.ws.config.xml.internal.variables.ConfigVariable;
 import com.ibm.ws.config.xml.internal.variables.ConfigVariableRegistry;
 import com.ibm.ws.ffdc.annotation.FFDCIgnore;
-import com.ibm.ws.kernel.boot.internal.KernelUtils;
-import com.ibm.ws.kernel.server.element.ServerElement;
 import com.ibm.ws.kernel.service.util.DesignatedXMLInputFactory;
 import com.ibm.wsspi.kernel.service.location.MalformedLocationException;
 import com.ibm.wsspi.kernel.service.location.WsLocationAdmin;
@@ -319,33 +316,6 @@ public class XMLConfigParser {
             config.setDescription(descriptionAttributeValue);
         }
         
-        // Parse quiesceTimeout attribute from server element (beta-only feature)
-        boolean isBeta = Boolean.valueOf(System.getProperty("com.ibm.ws.beta.edition"));
-		boolean timeoutIsSet = false;
-        String quiesceTimeoutValue = isBeta ? getAttributeValue(parser, "quiesceTimeout") : null;
-
-        if (quiesceTimeoutValue != null) {
-
-            // Beta mode with quiesceTimeout attribute.
-            try {
-                Long timeoutSeconds = KernelUtils.evaluateDuration(quiesceTimeoutValue, TimeUnit.SECONDS);
-                if (timeoutSeconds != null) {
-                    timeoutIsSet = ServerElement.setQuiesceTimeout(timeoutSeconds.intValue());
-                }
-            } catch (Exception e) {
-                // Exception during parsing - will set default and warn below
-            }
-
-            if (!timeoutIsSet)  {
-               Tr.warning(tc, "warn.invalid.quiesce.timeout", quiesceTimeoutValue);
-            }           
-        }
-
-		if (!timeoutIsSet)  {
-            // Not needed, except that test code needs a way to reset the default
-            ServerElement.setDefaultQuiesceTimeout();
-        }
-
         List<WsResource> includes = config.getIncludes();
 
         try {

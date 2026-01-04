@@ -29,7 +29,11 @@ instrument.classesExcludes: com/ibm/ws/kernel/server/element/internal/resources/
 -buildpath: \
  com.ibm.websphere.appserver.spi.logging;version=latest,\
  com.ibm.ws.logging.core;version=latest,\
- com.ibm.ws.org.osgi.annotation.versioning;version=latest
+ com.ibm.ws.org.osgi.annotation.versioning;version=latest,\
+ com.ibm.websphere.org.osgi.core;version=latest,\
+ com.ibm.websphere.org.osgi.service.component;version=latest,\
+ com.ibm.wsspi.org.osgi.service.component.annotations;version=latest,\
+ com.ibm.ws.kernel.boot.core;version=latest
 
 -testpath: \
  ../build.sharedResources/lib/junit/old/junit.jar;version=file, \
