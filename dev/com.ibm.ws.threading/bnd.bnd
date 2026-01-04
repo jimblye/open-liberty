@@ -30,8 +30,6 @@ Private-Package: com.ibm.ws.threading.internal, \
     com.ibm.ws.threading.internal.resources, \
     io.openliberty.threading.virtual.internal
 
-Import-Package: com.ibm.ws.kernel.boot.core.*,*
-
 Service-Component=com.ibm.ws.threading.internal.DeferrableScheduledExecutorImpl; \
         implementation:=com.ibm.ws.threading.internal.DeferrableScheduledExecutorImpl; \
         executor='java.util.concurrent.ScheduledExecutorService(deferrable=false)'; \
@@ -72,7 +70,6 @@ instrument.classesExcludes: com/ibm/ws/threading/internal/resources/*.class
 	com.ibm.ws.org.osgi.annotation.versioning;version=latest,\
 	com.ibm.ws.kernel.service;version=latest,\
 	com.ibm.ws.kernel.boot;version=latest,\
-	com.ibm.ws.kernel.boot.core;version=latest,\
     com.ibm.ws.kernel.security.thread;version=latest,\
 	io.openliberty.threading.virtual;version=latest,\
 	io.openliberty.threading.virtual.internal;version=latest,\

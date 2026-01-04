@@ -47,7 +47,6 @@ import com.ibm.websphere.ras.Tr;
 import com.ibm.websphere.ras.TraceComponent;
 import com.ibm.websphere.ras.annotation.Trivial;
 import com.ibm.ws.ffdc.annotation.FFDCIgnore;
-import com.ibm.ws.kernel.boot.internal.KernelUtils;
 import com.ibm.ws.kernel.feature.ServerStarted;
 import com.ibm.ws.kernel.service.util.AvailableProcessorsListener;
 import com.ibm.ws.kernel.service.util.CpuInfo;
@@ -105,20 +104,6 @@ public final class ExecutorServiceImpl implements WSExecutorService, ThreadQuies
      * are replaced with this value.
      */
     final static int MINIMUM_POOL_SIZE = 4;
-
-    /**
-     * Amount of time to wait for quiesce work to complete before continuing with shutdown.
-     */
-    final static int MINIMUM_QUIESCE_TIMEOUT = 30;
-    protected int quiesceTimeout = MINIMUM_QUIESCE_TIMEOUT;
-
-    /**
-     * @return the quiesceTimeout
-     */
-    @Override
-    public int getQuiesceTimeout() {
-        return quiesceTimeout;
-    }
 
     /**
      * The most recently provided component config for the executor.
@@ -214,8 +199,6 @@ public final class ExecutorServiceImpl implements WSExecutorService, ThreadQuies
         return threadPool;
     }
 
-    public static boolean isBeta = Boolean.valueOf(System.getProperty("com.ibm.ws.beta.edition"));
-
     // Default to use BoundedBuffer, but make it possible to easily switch to using ConcurrentPriorityBlockingQueue
     public static final boolean useBoundedBuffer = Boolean.valueOf(System.getProperty("io.openliberty.threading.useBoundedBuffer", "true"));
 
@@ -241,14 +224,6 @@ public final class ExecutorServiceImpl implements WSExecutorService, ThreadQuies
 
         int coreThreads = Integer.parseInt(String.valueOf(componentConfig.get("coreThreads")));
         int maxThreads = Integer.parseInt(String.valueOf(componentConfig.get("maxThreads")));
-        if (isBeta) {
-            String quiesceTimeoutString = (String) (componentConfig.get("quiesceTimeout"));
-            try {
-                quiesceTimeout = Integer.valueOf(KernelUtils.parseDuration(quiesceTimeoutString, TimeUnit.SECONDS));
-            } catch (NumberFormatException nfe) {
-                Tr.warning(tc, "CWWKE1206.quiesce.timeout.not.valid", quiesceTimeoutString);
-            }
-        }
 
         if (maxThreads <= 0) {
             maxThreads = Integer.MAX_VALUE;
@@ -256,10 +231,6 @@ public final class ExecutorServiceImpl implements WSExecutorService, ThreadQuies
 
         if (coreThreads < 0) {
             coreThreads = 2 * CpuInfo.getAvailableProcessors().get();
-        }
-
-        if (quiesceTimeout < MINIMUM_QUIESCE_TIMEOUT) {
-            quiesceTimeout = MINIMUM_QUIESCE_TIMEOUT;
         }
 
         // Make sure coreThreads is not bigger than maxThreads, subject to MINIMUM_POOL_SIZE limit
@@ -624,9 +595,9 @@ public final class ExecutorServiceImpl implements WSExecutorService, ThreadQuies
         this.serverStopping = true;
 
         try {
-            // Wait for all pre-quiesce work to complete.
+            // Wait 30 seconds for all pre-quiesce work to complete
             phaser.arriveAndDeregister();
-            phaser.awaitAdvanceInterruptibly(0, quiesceTimeout, TimeUnit.SECONDS);
+            phaser.awaitAdvanceInterruptibly(0, 30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             //FFDC and fail quiesce notification
             return false;
