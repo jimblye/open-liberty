@@ -2100,7 +2100,7 @@ case "$ACTION" in
 
   # Stop the server.
   stop)
-    serverEnv
+    serverEnvAndJVMOptions
     if checkServer true
     then
       PID=
@@ -2128,7 +2128,7 @@ case "$ACTION" in
 
   # Check if server is running
   status)
-    serverEnv
+    serverEnvAndJVMOptions
     if checkServer true
     then
       serverPIDStatus
@@ -2180,7 +2180,7 @@ case "$ACTION" in
 
   # dump the server's configs/logs/status to a zip file
   dump)
-    serverEnv
+    serverEnvAndJVMOptions
     # Check to see if the server exists
     if checkServer true
     then
@@ -2193,7 +2193,7 @@ case "$ACTION" in
 
   # dump JVM status
   javadump)
-    serverEnv
+    serverEnvAndJVMOptions
     if checkServer true
     then
       javaCmd '' "${SERVER_NAME}" --javadump "$@"
@@ -2205,7 +2205,7 @@ case "$ACTION" in
 
   # pause the server
   pause)
-    serverEnv
+    serverEnvAndJVMOptions
     # Check to see if the server exists
     if checkServer true
     then
@@ -2218,7 +2218,7 @@ case "$ACTION" in
 
   # resume the server
   resume)
-    serverEnv
+    serverEnvAndJVMOptions
     # Check to see if the server exists
     if checkServer true
     then
@@ -2230,7 +2230,7 @@ case "$ACTION" in
   ;;
 
   version)
-    serverEnv
+    serverEnvAndJVMOptions
     javaCmd '' --version
   ;;
 
