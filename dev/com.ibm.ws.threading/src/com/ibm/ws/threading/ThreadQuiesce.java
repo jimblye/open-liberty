@@ -17,7 +17,13 @@ package com.ibm.ws.threading;
  */
 public interface ThreadQuiesce {
 
-    boolean quiesceThreads();
+    /**
+     * Quiesce threads with the specified timeout.
+     *
+     * @param quiesceTimeoutMillis the timeout in milliseconds
+     * @return true if quiesce completed successfully, false otherwise
+     */
+    boolean quiesceThreads(long quiesceTimeoutMillis);
 
     int getActiveThreads();
 
