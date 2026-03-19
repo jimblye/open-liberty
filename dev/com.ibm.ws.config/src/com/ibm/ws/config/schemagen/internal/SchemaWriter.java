@@ -121,6 +121,12 @@ class SchemaWriter {
     private static boolean isEarlyAccess() {
         boolean result = false;
 
+        // Check system property first (for testing/development)
+        String betaProperty = System.getProperty("com.ibm.ws.beta.edition");
+        if ("true".equalsIgnoreCase(betaProperty)) {
+            return true;
+        }
+
         final Properties props = new Properties();
         AccessController.doPrivileged(new PrivilegedAction<Object>() {
 
@@ -167,7 +173,7 @@ class SchemaWriter {
 
                         File f = new File(url.toURI());
                         // The parent of the jar is lib, so the parent of the parent is the install.
-                        installDir = f.getParentFile();
+                        installDir = f.getParentFile().getParentFile();
                     } catch (MalformedURLException e) {
                         // Not sure we can get here so ignore.
                     } catch (URISyntaxException e) {
@@ -413,11 +419,13 @@ class SchemaWriter {
             if (serverOcd != null) {
                 Map<String, ExtendedAttributeDefinition> serverAttrs = serverOcd.getAttributeMap();
                 for (ExtendedAttributeDefinition attr : serverAttrs.values()) {
-                    String attrName = attr.getID();
-                    Type type = Type.fromId(attr.getType());
-                    String xsdType = type.getGlobalSchemaType();
-                    boolean required = attr.getCardinality() > 0;
-                    writeAttributeWithDocumentation(attrName, xsdType, required, attr.getDescription(), attr.getName(), null);
+                    if (shouldAddAttribute(attr)) {
+                        String attrName = attr.getID();
+                        Type type = Type.fromId(attr.getType());
+                        String xsdType = type.getGlobalSchemaType();
+                        boolean required = attr.getCardinality() > 0;
+                        writeAttributeWithDocumentation(attrName, xsdType, required, attr.getDescription(), attr.getName(), null);
+                    }
                 }
             }
             
