@@ -17,6 +17,7 @@ import static io.openliberty.classloading.classpath.fat.FATSuite.TEST_LIB9_JAR;
 import static io.openliberty.classloading.classpath.fat.FATSuite.TEST_PLATFORM_DELEGATION_WAR;
 import static org.junit.Assert.fail;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -191,20 +192,33 @@ public abstract class AppParentDelegationAbstractTest extends FATServletClient {
         }
 
         public void test(LibertyServer server) throws Exception {
+            // if -Xbootclasspath has been detected then revert to Java 8 behavior testing
+            boolean testJava9Behavior = JavaInfo.JAVA_VERSION >= 9 && !(findXbootclasspathTrace(server));
             if (traceTarget != null) {
                 if (negativeTest) {
-                    checkNegativeTrace(server, this, JavaInfo.JAVA_VERSION >= 9 ? traceMsg9Plus : traceMsg8, traceTarget);
+                    checkNegativeTrace(server, this, testJava9Behavior ? traceMsg9Plus : traceMsg8, traceTarget);
                 } else {
-                    checkTrace(server, this, JavaInfo.JAVA_VERSION >= 9 ? traceMsg9Plus : traceMsg8, traceTarget);
+                    checkTrace(server, this, testJava9Behavior ? traceMsg9Plus : traceMsg8, traceTarget);
                 }
             }
             if (secondaryTarget != null) {
                 if (negativeTest) {
-                    checkNegativeTrace(server, this, JavaInfo.JAVA_VERSION >= 9 ? secondaryMsg9Plus : secondaryMsg8, secondaryTarget);
+                    checkNegativeTrace(server, this, testJava9Behavior ? secondaryMsg9Plus : secondaryMsg8, secondaryTarget);
                 } else {
-                    checkTrace(server, this, JavaInfo.JAVA_VERSION >= 9 ? secondaryMsg9Plus : secondaryMsg8, secondaryTarget);
+                    checkTrace(server, this, testJava9Behavior ? secondaryMsg9Plus : secondaryMsg8, secondaryTarget);
                 }
             }
+        }
+
+        private boolean findXbootclasspathTrace(LibertyServer server) throws Exception {
+            Iterator<String> traceLines = server.findStringsInLogsAndTrace(".*").iterator();
+            while (traceLines.hasNext()) {
+                String line = traceLines.next();
+                if (line.contains("discoverParentPackages: returning null because -Xbootclasspath JVM option is being used.")) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -225,6 +239,10 @@ public abstract class AppParentDelegationAbstractTest extends FATServletClient {
     }
 
     public static void setupTestServer(LibertyServer server) throws Exception {
+        setupTestServer(server, false);
+    }
+
+    public static void setupTestServer(LibertyServer server, boolean lib6Xbootclasspath) throws Exception {
         ShrinkHelper.exportAppToServer(server, TEST_PLATFORM_DELEGATION_WAR, DeployOptions.SERVER_ONLY);
 
         ShrinkHelper.exportToServer(server, "/libs", TEST_LIB6_JAR, DeployOptions.SERVER_ONLY);
@@ -232,6 +250,9 @@ public abstract class AppParentDelegationAbstractTest extends FATServletClient {
         setupLibraryFolder(TEST_LIB8_JAR, server);
         setupLibraryFolder(TEST_LIB9_JAR, server);
 
+        if (lib6Xbootclasspath) {
+            server.setJvmOptions(Collections.singletonList("-Xbootclasspath/a:" + server.getServerRoot() + "/libs/" + TEST_LIB6_JAR.getName()));
+        }
         server.startServer();
     }
 
